@@ -21,13 +21,22 @@ LINE = (
 )
 
 
+def validate_line(line: str) -> bool:
+    """Gate the sealed scorer applies: 1-200 chars, UTF-8, not whitespace-only."""
+    return bool(line.strip()) and 1 <= len(line) <= 200
+
+
+def resolve_output_dir() -> str:
+    """Output dir from the grader env var, falling back to /output."""
+    return os.environ.get("MAKEFUN_OUTPUT_DIR") or "/output"
+
+
 def main() -> int:
-    # Self-check the same gate the sealed scorer applies: 1-200 chars,
-    # UTF-8, not only whitespace. Refuse to write an invalid line.
-    if not 1 <= len(LINE) <= 200 or not LINE.strip():
+    # Self-check the same gate the sealed scorer applies before writing.
+    if not validate_line(LINE):
         print("entry line fails the 1-200 character gate", file=sys.stderr)
         return 1
-    out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR") or "/output"
+    out_dir = resolve_output_dir()
     os.makedirs(out_dir, exist_ok=True)
     path = os.path.join(out_dir, "entry.txt")
     with open(path, "w", encoding="utf-8") as f:
